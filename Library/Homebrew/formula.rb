@@ -2771,9 +2771,10 @@ class Formula
       next if full_name.blank?
 
       # Use base name to check the cellar directly, avoiding Formulary.resolve.
+      # A dep is "missing" if it's in the hide list (pretend uninstalled) or
+      # genuinely not installed in the cellar.
       base_name = full_name.include?("/") ? full_name.rpartition("/").last : full_name
-      next if hide.include?(base_name)
-      next if (HOMEBREW_CELLAR/base_name).directory?
+      next if hide.exclude?(base_name) && (HOMEBREW_CELLAR/base_name).directory?
 
       Dependency.new(full_name)
     end

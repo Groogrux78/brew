@@ -2770,10 +2770,12 @@ class Formula
       full_name = d["full_name"]
       next if full_name.blank?
 
-      dep = Dependency.new(full_name)
-      dep if hide.include?(dep.name) || dep.to_installed_formula.installed_prefixes.none?
-    rescue FormulaUnavailableError
-      nil
+      # Use base name to check the cellar directly, avoiding Formulary.resolve.
+      base_name = full_name.include?("/") ? full_name.rpartition("/").last : full_name
+      next if hide.include?(base_name)
+      next if (HOMEBREW_CELLAR/base_name).directory?
+
+      Dependency.new(full_name)
     end
   end
 

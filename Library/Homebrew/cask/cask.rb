@@ -184,6 +184,13 @@ module Cask
       os_value = @dsl.os
 
       return false if contains_os_specific_artifacts?
+      return false if artifacts.any? do |a|
+        Artifact::MACOS_ONLY_ARTIFACTS.include?(a.class) ||
+        (a.is_a?(Artifact::Installer) && a.manual_install)
+      end
+
+      # Casks with only arch-specific blocks (no OS blocks) are platform-agnostic
+      return true unless @dsl.on_os_blocks_exist?
 
       os_value.present?
     end
